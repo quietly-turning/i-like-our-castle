@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+
+	<meta property="og:url" content="http://dguzek.github.io/i-like-our-castle/">
+	<meta property="og:title" content="I like our castle.">
+	<meta property="og:description" content="">
+	<meta property="og:image" content="http://dguzek.github.io/i-like-our-castle/assets/fb-preview.png">
+	<meta property="og:image:height" content="630">
+	<meta property="og:image:width" content="1200">
+
+	<title>I like our castle.</title>
+
+	<style>
+		html,body{
+			margin: 0px;
+			padding: 0px;
+		}
+
+		footer{
+			font-family: Monaco, Verdana;
+			font-size: 0.8em;
+			color: #fff;
+			position:absolute;
+			bottom:0px;
+			width: 100%;
+			text-align: center;
+		}
+
+		#canvas-container{
+			width: 800px;
+			height:600px;
+			position: absolute;
+			bottom:0;
+			top:0;
+			right:0;
+			left:0;
+			margin-bottom: auto;
+			margin-top: auto;
+			margin-right: auto;
+			margin-left: auto;
+		}
+
+		#canvas{
+			border: 1px solid #ccc;
+		}
+
+		#title{
+			text-align: center;
+			margin:-1.4em 0 0 0;
+			font-size: 1.4em;
+			font-family: "Trebuchet MS", Helvetica, sans-serif;
+		}
+	</style>
+
+	<script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+	<script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
+	<script src="https://code.createjs.com/soundjs-0.6.2.min.js"></script>
+	<script src="./i-like-our-castle.js"></script>
+</head>
+
+
+<body onload="init();">
+
+	<div id=canvas-container>
+		<p id="title">&nbsp;</p>
+		<canvas id="canvas" width="0" height="0"></canvas>
+	</div>
+
+	<footer>
+		<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a>
+	</footer>
+</body>
+</html>
