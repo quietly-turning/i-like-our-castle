@@ -1,5 +1,5 @@
 // global game objects
-var castle, stage, paddle, ball;
+var castle, stage, paddle, ball, delta;
 
 function Brick( brick ){
 
@@ -168,6 +168,8 @@ function Ball( ball ){
 
 	this.dx = ball.dx;
 	this.dy = ball.dy;
+	// initialize moving to be false no matter what
+	this.moving = false;
 
 	this.init = function(){
 		this.obj = new createjs.Shape();
@@ -180,6 +182,7 @@ function Ball( ball ){
 		this.obj.alpha = 0;
 		this.dx = 0;
 		this.dy = 0;
+		this.moving = false;
 		this.obj.y = paddle.y - this.r;
 		this.obj.x = paddle.obj.x;
 		createjs.Tween.get(this.obj, {loop: false})
@@ -190,6 +193,9 @@ function Ball( ball ){
 		// safety check
 		if (this.obj == undefined){ return; }
 
+		// convert ms to seconds
+		delta = event.delta/1000;
+
 		// ball collides with right || left of canvas
 		if (this.obj.x + this.dx > stage.canvas.width || this.obj.x + this.dx < 0){
 			this.dx = -this.dx;
@@ -198,11 +204,12 @@ function Ball( ball ){
 		// ball collides with top of canvas
 		if (castle.words_revealed < castle.bricks.length
 		&& this.obj.y + this.dy < 0){
-			this.dy = -this.dy;
+			this.dy = Math.abs(this.dy);
 
 		// ball goes beyond bottom (plus padding)
 		} else if (this.obj.y + this.dy > stage.canvas.height + 20){
 			this.reset_position();
+			return;
 		}
 
 		// ball collides with paddle
@@ -215,14 +222,27 @@ function Ball( ball ){
 			var relativeIntersect = this.obj.x - paddle.obj.x;
 			// -1 to 1
 			var normalizedIntersect = relativeIntersect/(paddle.w/2)
-			this.dx = normalizedIntersect * ball.velocity;
-			this.dy = -Math.abs(this.dy);
+			this.dx = normalizedIntersect * (this.velocity * delta);
+			this.dy = -Math.abs(this.velocity * delta);
 		}
 
-		// remove ball
+		// endgame has resulted in ball going beyond the upper bound
 		if (this.obj.y < -200){
-			this.obj.visible = false;
-			paddle.remove();
+			if (castle.words_revealed < castle.bricks.length){
+				this.reset_position();
+				return;
+			} else {
+				// hide ball and paddle
+				this.obj.visible = false;
+				paddle.remove();
+			}
+		}
+
+		// if the ball was just released from the paddle
+		// this.moving will be true, but this.dy will still be 0
+		// so start the ball moving upwards
+		if (this.moving && this.dy == 0){
+			this.dy = -(this.velocity * delta);
 		}
 
 		this.obj.x += this.dx;
@@ -262,7 +282,7 @@ function Paddle( paddle ){
 				this.obj.x += this.keyboard_dx;
 			}
 			// if the ball has no motion, its x should track the paddle's x
-			if (ball.dy == 0 && ball.dx == 0){
+			if (!ball.moving){
 				ball.obj.x = this.obj.x;
 			}
 		}
@@ -272,7 +292,7 @@ function Paddle( paddle ){
 				this.obj.x -= this.keyboard_dx;
 			}
 			// if the ball has no motion, its x should track the paddle's x
-			if (ball.dy == 0 && ball.dx == 0){
+			if (!ball.moving){
 				ball.obj.x = this.obj.x;
 			}
 		}
@@ -314,7 +334,7 @@ function init(){
 	var title  = document.getElementById("title");
 
 	paddle = new Paddle( { x: 0, y: 0, w: 100, h: 10, c: "#000000" } );
-	ball = new Ball( { x: 0, y: 0, r: 14, velocity: 6, c: "DeepSkyBlue", dx: 0, dy: 0 } );
+	ball = new Ball( { x: 0, y: 0, r: 14, velocity: 180, c: "DeepSkyBlue", dx: 0, dy: 0 } );
 
 	createjs.Tween.get(canvas, {loop: false})
 		.to({width: 800}, 650)
@@ -323,7 +343,7 @@ function init(){
 			castle.init();
 			// start gameloop
 			createjs.Ticker.on("tick", tick);
-			createjs.Ticker.setFPS(30);
+			createjs.Ticker.setFPS(40);
 		})
 		.call(function(){
 			ball.init();
@@ -358,7 +378,7 @@ function addEventListeners(){
 
 		// if the ball is currently immobile (not playing)
 		// move the ball to follow the paddle (until mouseup)
-		if (ball.dy == 0 && ball.dx == 0){
+		if (!ball.moving){
 			ball.obj.x = paddle.obj.x;
 		}
 	});
@@ -392,8 +412,8 @@ function startBallInMotion(){
 
 	// if the ball is currently immobile (not playing)
 	// start the ball into motion
-	if (ball.dy == 0 && ball.dx == 0){
-		ball.dy = -ball.velocity;
+	if (!ball.moving){
+		ball.moving = true;
 	}
 }
 
